@@ -1,18 +1,33 @@
 boolean moveable;
+boolean ballsCreated;
 
-float ballx;
+
 int score;
+float angle;
+PVector base;
 
-ArrayList<Ball> balllist;
+ArrayList<Ball> ballList;
 
 void setup() {
   size(640, 480);
-  balllist = new ArrayList<Ball>();
+  ballList = new ArrayList<Ball>();
+  base = new PVector(width / 2, height - 60);
   
-  ballx = width / 2;
   
-  moveable = false;
+  moveable = true;
+  ballsCreated = false;
   score = 3;
+  angle = -3 * PI / 4;
+}
+
+void mousePressed() {
+  moveable = false;
+  ballsCreated = false;
+  
+  float dx = mouseX - base.x;
+  float dy = mouseY - base.y;
+  
+  angle = atan2(dy, dx);
 }
 
 void draw() {
@@ -26,26 +41,36 @@ void draw() {
   if (moveable) {
     
     fill(255);
-    circle(ballx, height - 60, 10);
+    circle(base.x, base.y, 10);
     
   } else {
-    if (balllist.size() < score && frameCount % 5 == 0) {
-      Ball b = new Ball(ballx, height - 60, 10);
+    if (ballList.size() < score && frameCount % 5 == 0 && !ballsCreated) {
+      Ball b = new Ball(base.x, base.y, 5);
       
-      b.vel = new PVector(-1, -1);
+      b.vel = new PVector(cos(angle), sin(angle));
       
-      balllist.add(b);
+      ballList.add(b);
     }
     
-    for (Ball b : balllist) {
+    if (ballList.size() == score) {
+      ballsCreated = true;
+    }
+    
+    if (ballList.size() == 0 && frameCount % 5 == 0) {
+      moveable = true;
+    }
+    
+    for (Ball b : ballList) {
       for (int i = 0; i < 5; i++) {
         b.move();
-        
-        if (b.pos.y > height - b.r) {
-          balllist.remove(b);
-        }
       }
       b.draw();
+    }
+    
+    for (int i = ballList.size() - 1; i >= 0; i--) {
+      if (ballList.get(i).pos.y > height - ballList.get(i).r) {
+        ballList.remove(i);
+      } 
     }
   }
 }

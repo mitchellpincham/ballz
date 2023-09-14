@@ -19,6 +19,6 @@ class Ball {
   
   void draw() {
     fill(255);
-    circle(this.pos.x, this.pos.y, this.r);
+    circle(this.pos.x, this.pos.y, this.r * 2);
   }
 }
