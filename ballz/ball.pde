@@ -19,6 +19,7 @@ class Ball {
 
     for (Block b : blocks) {
       if (this.touching(b)) {
+        b.val--;
         this.vel.x *= -1;
         this.pos.x += this.vel.x;
         break;
@@ -29,6 +30,7 @@ class Ball {
 
     for (Block b : blocks) {
       if (this.touching(b)) {
+        b.val--;
         this.vel.y *= -1;
         this.pos.y += this.vel.y;
         break;

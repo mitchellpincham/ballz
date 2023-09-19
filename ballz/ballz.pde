@@ -1,5 +1,7 @@
-boolean moveable;
-boolean ballsCreated;
+int phase;
+int AIMING = 0;
+int SHOOTING = 1;
+int WAITING = 2;
 
 int ballVel;
 int score;
@@ -19,18 +21,16 @@ void setup() {
 
   blocksPerRow = 10;
   blockWidth = width / blocksPerRow;
-  generateBlocks();
 
   ballVel = 8;
-  moveable = true;
-  ballsCreated = false;
-  score = 3;
+  phase = AIMING;
+  score = 1;
   angle = -3 * PI / 4;
+  generateBlocks();
 }
 
 void mousePressed() {
-  moveable = false;
-  ballsCreated = false;
+  phase = SHOOTING;
 
   float dx = mouseX - base.x;
   float dy = mouseY - base.y;
@@ -38,10 +38,19 @@ void mousePressed() {
   angle = atan2(dy, dx);
 }
 
+void aimingPhase() {
+  score++;
+  for (Block b : blockList) {
+    b.moveDown();
+  }
+  generateBlocks();
+  phase = AIMING;
+}
+
 void generateBlocks() {
   for (int x = 0; x < width; x += blockWidth) {
     if (random(1) > 0.5) {
-      Block b = new Block(x, blockWidth, blockWidth);
+      Block b = new Block(x, blockWidth, blockWidth, score);
       blockList.add(b);
     }
   }
@@ -50,6 +59,14 @@ void generateBlocks() {
 void drawBlocks() {
   for (Block b : blockList) {
     b.draw();
+  }
+}
+
+void controlBlocks() {
+  for (int i = blockList.size() - 1; i >= 0; i--) {
+    if (blockList.get(i).val < 1) {
+      blockList.remove(i);
+    }
   }
 }
 
@@ -65,7 +82,7 @@ void drawBalls() {
 void controlBalls() {
 
   // create new ball if needed
-  if (ballList.size() < score && frameCount % 5 == 0 && !ballsCreated) {
+  if (ballList.size() < score && frameCount % 5 == 0 && phase == SHOOTING) {
     Ball b = new Ball(base.x, base.y, 6);
     
     b.vel = new PVector(cos(angle), sin(angle));
@@ -73,7 +90,7 @@ void controlBalls() {
     ballList.add(b);
   }
   
-  // check if each ball has hit the bottom and remove it if it has
+  // check if each ball has hit the bottom and remove it if it has, also remove it if it has a score less than 0.
   for (int i = ballList.size() - 1; i >= 0; i--) {
     if (ballList.get(i).pos.y > height - ballList.get(i).r) {
       ballList.remove(i);
@@ -89,23 +106,28 @@ void draw() {
   fill(255);
   text(score, width - 30, 30);
 
-  if (moveable) {
+  // if we haven't shot the balls
+  if (phase == AIMING) {
 
     fill(255);
     circle(base.x, base.y, 12);
+    
+    // else we have/are shooting the balls.
   } else {
+  
+    controlBalls();
+    controlBlocks();
     
     // if all the balls have hit the bottom then move on to next phase
     if (ballList.size() == 0 && frameCount % 5 == 0) {
-      moveable = true;
+      aimingPhase();
     }
   
-    // if all the valls have just been created
+    // if all the balls have just been created
     if (ballList.size() == score) {
-      ballsCreated = true;
+      phase = WAITING;
     }
-  
-    controlBalls();
+    
     drawBalls();
   }
   drawBlocks();
