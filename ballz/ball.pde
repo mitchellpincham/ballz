@@ -39,6 +39,7 @@ class Ball {
 
     if (this.pos.x < r || this.pos.x > width - r) {
       this.vel.x *= -1;
+      this.vel.y += 0.01;
     }
     if (this.pos.y < r) {
       this.vel.y *= -1;
@@ -46,7 +47,7 @@ class Ball {
   }
 
   void draw() {
-    fill(255);
+    fill(0, 0, 100);
     circle(this.pos.x, this.pos.y, this.r * 2);
   }
 }
